@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Box Screen</title>
+    <style>
+        body {font-family: Arial, sans-serif; text-align: center;}
+        .center {margin-left: auto; margin-right: auto; border-collapse: collapse; border: 1px solid black;
+        "width: 100%"}
+        td {
+            padding: 10px 30px;
+            border: 1px solid black;}
+        th {padding-top: 20px; padding-bottom: 20px; border: 1px solid black;}
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Box Screen</h1>
+        <table class="center">
+            <thead>
+            <tr>
+                <th style="width: 10%;"> Species </th>
+                <th style="width: 10%;"> Name </th>
+                <th style="width: 10%;"> Gender </th>
+                <th style="width: 10%;"> Nature </th>
+                <th style="width: 10%;"> Move 1 </th>
+                <th style="width: 10%;"> Move 2 </th>
+                <th style="width: 10%;"> Move 3 </th>
+                <th style="width: 10%;"> Move 4 </th>
+                <th style="width: 10%;"> Update </th>
+                <th style="width: 10%;"> Delete </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(pokemonList)}">
+                <td colspan="2"> No Pokemon Available </td>
+            </tr>
+            <tr th:each="pokemon : ${pokemonList}">
+                <td><span th:text="${pokemon.species}"> Species </span></td>
+                <td><span th:text="${pokemon.name}"> Name </span></td>
+                <td><span th:text="${pokemon.gender}"> Gender </span></td>
+                <td><span th:text="${pokemon.nature}"> Nature </span></td>
+                <td><span th:text="${pokemon.move1}"> Move 1 </span></td>
+                <td><span th:text="${pokemon.move2}"> Move 2 </span></td>
+                <td><span th:text="${pokemon.move3}"> Move 3 </span></td>
+                <td><span th:text="${pokemon.move4}"> Move 4 </span></td>
+                <td><form name="update" th:action="@{/update}" method="get">
+                    <div class="update"><button type="submit" id="update" name="pokemonId" th:value="${pokemon.id}" th:text="Update"></button></div>
+                </form></td>
+                <td><form name="delete" th:action="@{/delete}" method="get">
+                    <div class="delete"><button type="submit" id="delete" name="pokemonId" th:value="${pokemon.id}" th:text="Delete"></button></div>
+                </form></td>
+            </tr>
+            </tbody>
+        </table>
+        <form th:action="@{/create}" method="get">
+            <div class="create"><button type="submit" name="action" th:value="Submit">Create Pokemon</button></div>
+        </form>
+    </div>
+</body>
+</html>
