@@ -14,34 +14,50 @@
     </style>
 </head>
 <body>
+<h1 th:text="${updatePokemon}"></h1>
 <div>
-    <form action="@{/home}" th:action="@{/home}" method="put">
-        <label for="species">Species:</label>
-        <input type="text" id="species" name="species" required="required" maxlength="12"><br><br>
+    <form action="@{/home}" th:action="@{/update}" method="post">
+        <span th:text="${species}"> Species </span><br><br>
         <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required="required" maxlength="12"><br><br>
-        <label for="gender">Gender:</label>
-        <select name="gender" id="gender">
-            <option value="MALE">MALE</option>
-            <option value="FEMALE">FEMALE</option>
-            <option value="GENDERLESS">GENDERLESS</option>
-        </select><br><br>
+        <input type="text" id="name" name="name" required="required" th:value="${name}" maxlength="12"><br><br>
+        <span th:text="${gender}"> Gender </span><br><br>
         <label for="nature">Nature:</label>
         <select name="nature" id="nature">
-            <option value="ADAMANT">ADAMANT</option>
-            <option value="MODEST">MODEST</option>
-            <option value="JOLLY">JOLLY</option>
-            <option value="TIMID">TIMID</option>
+            <option value="ADAMANT" th:selected="${ADAMANT}">ADAMANT </option>
+            <option value="BASHFUL" th:selected="${BASHFUL}">BASHFUL</option>
+            <option value="BOLD" th:selected="${BOLD}">BOLD</option>
+            <option value="BRAVE" th:selected="${BRAVE}">BRAVE</option>
+            <option value="CALM" th:selected="${CALM}">CALM</option>
+            <option value="CAREFUL" th:selected="${CAREFUL}">CAREFUL </option>
+            <option value="DOCILE" th:selected="${DOCILE}">DOCILE</option>
+            <option value="GENTLE" th:selected="${GENTLE}">GENTLE</option>
+            <option value="HARDY" th:selected="${HARDY}">HARDY</option>
+            <option value="HASTY" th:selected="${HASTY}">HASTY</option>
+            <option value="IMPISH" th:selected="${IMPISH}">IMPISH </option>
+            <option value="JOLLY" th:selected="${JOLLY}">JOLLY</option>
+            <option value="LAX" th:selected="${LAX}">LAX</option>
+            <option value="LONELY" th:selected="${LONELY}">LONELY</option>
+            <option value="MILD" th:selected="${MILD}">MILD</option>
+            <option value="MODEST" th:selected="${MODEST}">MODEST </option>
+            <option value="NAIVE" th:selected="${NAIVE}">NAIVE</option>
+            <option value="NAUGHTY" th:selected="${NAUGHTY}">NAUGHTY</option>
+            <option value="QUIET" th:selected="${QUIET}">QUIET</option>
+            <option value="QUIRKY" th:selected="${QUIRKY}">QUIRKY</option>
+            <option value="RASH" th:selected="${RASH}">RASH </option>
+            <option value="RELAXED" th:selected="${RELAXED}">RELAXED</option>
+            <option value="SASSY" th:selected="${SASSY}">SASSY</option>
+            <option value="SERIOUS" th:selected="${SERIOUS}">SERIOUS</option>
+            <option value="TIMID" th:selected="${TIMID}">TIMID</option>
         </select><br><br>
         <label for="move1">Move 1:</label>
-        <input type="text" id="move1" name="move1" required="required" maxlength="25"><br><br>
+        <input type="text" id="move1" name="move1" required="required" th:value="${move1}" maxlength="25"><br><br>
         <label for="move2">Move 2:</label>
-        <input type="text" id="move2" name="move2" maxlength="25"><br><br>
+        <input type="text" id="move2" name="move2" th:value="${move2}" maxlength="25"><br><br>
         <label for="move3">Move 3:</label>
-        <input type="text" id="move3" name="move3" maxlength="25"><br><br>
+        <input type="text" id="move3" name="move3" th:value="${move3}" maxlength="25"><br><br>
         <label for="move4">Move 4:</label>
-        <input type="text" id="move4" name="move4" maxlength="25"><br><br>
-        <input type="submit" value="Create">
+        <input type="text" id="move4" name="move4" th:value="${move4}" maxlength="25"><br><br>
+        <div class="update"><button type="submit" id="update" name="pokemonId" th:value="${pokemonId}" th:text="Update"></button></div>
     </form>
 </div>
 </body>

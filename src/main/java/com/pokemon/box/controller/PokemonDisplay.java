@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 @RequestMapping(path = "/")
 public class PokemonDisplay {
 
+    List<Pokemon> pokemonList;
+
     @RequestMapping("/home")
     public String box(Model model){
         List<Pokemon> pokemonList = new ArrayList<Pokemon>();
@@ -71,14 +73,13 @@ public class PokemonDisplay {
                 .uri(URI.create(url))
                 .build();
         HttpResponse<String> getResponse = client.send(getRequest,HttpResponse.BodyHandlers.ofString());
-        System.out.println(getResponse.statusCode());
 
         //delete [] from response
         String charToDel = "[]";
         String pat = "[" + Pattern.quote(charToDel) + "]";
         String responseBody = getResponse.body().replaceAll(pat,"");
 
-        List<Pokemon> pokemonList = new ArrayList<Pokemon>();
+        pokemonList = new ArrayList<Pokemon>();
         //get list of Pokemon in JSONObject
         String[] parts = responseBody.split("(?<=}),(?=\\{)");
         for (String part : parts) {
@@ -106,11 +107,82 @@ public class PokemonDisplay {
         return "boxScreen";
     }
 
-    //Implement After Updating Pokemon
-    @PutMapping("/home")
+    @PostMapping("/update")
     public String box(Model model, @RequestParam String pokemonId, @RequestParam String name,
                       @RequestParam String nature, @RequestParam String move1,
-                      @RequestParam String move2, @RequestParam String move3, @RequestParam String move4){
+                      @RequestParam String move2, @RequestParam String move3, @RequestParam String move4) throws IOException, InterruptedException {
+        Instant now = Instant.now();
+        String url = "http://localhost:8080/api/v1/box";
+        String urlPut = url + "/" + pokemonId;
+        HttpClient client = HttpClient.newHttpClient();
+        Pokemon pokemon = pokemonList.get(0);
+        for(int i = 0; i < pokemonList.size(); i++){
+            if(pokemonList.get(i).getId().toString().equals(pokemonId)){
+                pokemon = pokemonList.get(i);
+                break;
+            }
+        }
+        pokemon.setName(name);
+        pokemon.setNature(PokemonNature.valueOf(nature));
+        pokemon.setMove1(move1);
+        pokemon.setMove2(move2);
+        pokemon.setMove3(move3);
+        pokemon.setMove4(move4);
+
+        String json = new StringBuilder()
+                .append("{")
+                .append("\"name\":\""+pokemon.getName()+"\",")
+                .append("\"nature\":\""+pokemon.getNature()+"\",")
+                .append("\"move1\":\""+pokemon.getMove1()+"\",")
+                .append("\"move2\":\""+pokemon.getMove2()+"\",")
+                .append("\"move3\":\""+pokemon.getMove3()+"\",")
+                .append("\"move4\":\""+pokemon.getMove4()+"\"")
+                .append("}").toString();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .uri(URI.create(urlPut))
+                .PUT(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        //get Pokemon list
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .GET()
+                .timeout(Duration.ofSeconds(10))
+                .uri(URI.create(url))
+                .build();
+        HttpResponse<String> getResponse = client.send(getRequest,HttpResponse.BodyHandlers.ofString());
+
+        //delete [] from response
+        String charToDel = "[]";
+        String pat = "[" + Pattern.quote(charToDel) + "]";
+        String responseBody = getResponse.body().replaceAll(pat,"");
+
+        pokemonList = new ArrayList<Pokemon>();
+        //get list of Pokemon in JSONObject
+        String[] parts = responseBody.split("(?<=}),(?=\\{)");
+        for (String part : parts) {
+            JSONObject jsonObject = new JSONObject(part);
+            Pokemon pokemonStored = new Pokemon(
+                    UUID.fromString((String) jsonObject.get("id")),
+                    (String) jsonObject.get("species"),
+                    (String) jsonObject.get("name"),
+                    PokemonGender.valueOf((String) jsonObject.get("gender")),
+                    PokemonNature.valueOf((String) jsonObject.get("nature")),
+                    (String) jsonObject.get("move1"),
+                    (String) jsonObject.get("move2"),
+                    (String) jsonObject.get("move3"),
+                    (String) jsonObject.get("move4"),
+                    now,
+                    now);
+            pokemonList.add(pokemonStored);
+        }
+
+        model.addAttribute("pokemonList",pokemonList);
+        model.addAttribute("update","Update");
+
         return "boxScreen";
     }
 
@@ -119,11 +191,25 @@ public class PokemonDisplay {
         return "createScreen";
     }
 
-    //Implement Update Pokemon screen
     @RequestMapping("/update")
-    public String update(Model model, @RequestParam String pokemonId, @RequestParam String species){
-        System.out.println(pokemonId);
-        System.out.println(species);
+    public String update(Model model, @RequestParam String pokemonId){
+        Pokemon pokemon = pokemonList.get(0);
+        for(int i = 0; i < pokemonList.size(); i++){
+            if(pokemonList.get(i).getId().toString().equals(pokemonId)){
+                pokemon = pokemonList.get(i);
+                break;
+            }
+        }
+        model.addAttribute("updatePokemon", "Update " + pokemon.getName());
+        model.addAttribute("pokemonId",pokemon.getId());
+        model.addAttribute("species","Species: " + pokemon.getSpecies());
+        model.addAttribute("name", pokemon.getName());
+        model.addAttribute("gender","Gender: " + pokemon.getGender().toString());
+        model.addAttribute(pokemon.getNature().toString(),"selected");
+        model.addAttribute("move1", pokemon.getMove1());
+        model.addAttribute("move2", pokemon.getMove2());
+        model.addAttribute("move3", pokemon.getMove3());
+        model.addAttribute("move4", pokemon.getMove4());
         return "updateScreen";
     }
 
@@ -149,13 +235,11 @@ public class PokemonDisplay {
                 .uri(URI.create(url))
                 .build();
         HttpResponse<String> getResponse = client.send(getRequest,HttpResponse.BodyHandlers.ofString());
-        System.out.println(getResponse.statusCode());
 
         //delete [] from response
         String charToDel = "[]";
         String pat = "[" + Pattern.quote(charToDel) + "]";
         String responseBody = getResponse.body().replaceAll(pat,"");
-        System.out.println(responseBody);
 
         if(!(responseBody.equals(""))) {
             List<Pokemon> pokemonList = new ArrayList<Pokemon>();
@@ -182,7 +266,6 @@ public class PokemonDisplay {
             model.addAttribute("pokemonList",pokemonList);
         }
 
- //       model.addAttribute("pokemonList",pokemonList);
         model.addAttribute("update","Update");
 
         return "boxScreen";
