@@ -28,10 +28,25 @@ public class PokemonDisplay {
     List<Pokemon> pokemonList;
 
     @RequestMapping("/home")
-    public String box(Model model){
+    public String box(Model model) throws IOException, InterruptedException {
         List<Pokemon> pokemonList = new ArrayList<Pokemon>();
         model.addAttribute("pokemonList",pokemonList);
-        return "boxScreen";
+
+        String url = "http://localhost:8080/api/v1/box";
+        Instant now = Instant.now();
+        HttpClient client = HttpClient.newHttpClient();
+
+        pokemonList = getPokemonList(url, client, now);
+        if (pokemonList == null) {
+            return "boxScreen";
+        }
+        else{
+            model.addAttribute("pokemonList",pokemonList);
+            model.addAttribute("update","Update");
+
+            return "boxScreen";
+        }
+
     }
 
     @PostMapping("/home")
@@ -66,6 +81,15 @@ public class PokemonDisplay {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+        pokemonList = getPokemonList(url, client, now);
+
+        model.addAttribute("pokemonList",pokemonList);
+        model.addAttribute("update","Update");
+
+        return "boxScreen";
+    }
+
+    public List<Pokemon> getPokemonList(String url, HttpClient client, Instant now) throws IOException, InterruptedException {
         //get Pokemon list
         HttpRequest getRequest = HttpRequest.newBuilder()
                 .GET()
@@ -78,14 +102,16 @@ public class PokemonDisplay {
         String charToDel = "[]";
         String pat = "[" + Pattern.quote(charToDel) + "]";
         String responseBody = getResponse.body().replaceAll(pat,"");
+        if (responseBody.isEmpty())
+            return pokemonList;
 
         pokemonList = new ArrayList<Pokemon>();
         //get list of Pokemon in JSONObject
         String[] parts = responseBody.split("(?<=}),(?=\\{)");
         for (String part : parts) {
-        //    System.out.println(part);
+            //    System.out.println(part);
             JSONObject jsonObject = new JSONObject(part);
-       //     System.out.println(jsonObject.get("species"));
+            //     System.out.println(jsonObject.get("species"));
             Pokemon pokemonStored = new Pokemon(
                     UUID.fromString((String) jsonObject.get("id")),
                     (String) jsonObject.get("species"),
@@ -101,10 +127,7 @@ public class PokemonDisplay {
             pokemonList.add(pokemonStored);
         }
 
-        model.addAttribute("pokemonList",pokemonList);
-        model.addAttribute("update","Update");
-
-        return "boxScreen";
+        return pokemonList;
     }
 
     @PostMapping("/update")
